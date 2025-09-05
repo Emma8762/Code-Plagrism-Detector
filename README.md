@@ -12,16 +12,19 @@ Features
 •	Compares structure of functions/classes using tree edit distance and line diffs.
 •	Detects disguised plagiarism (e.g., renaming variables, reordering).
 
+
 **•	ML-based text similarity**
 
 •	Uses TF-IDF vectorization + cosine similarity.
 •	Captures token-level similarity between reference and candidate code. 
 •	Robust against comments, spacing, and simple edits.
 
+
 **•	Hybrid scoring**
 
 •	Combines AST (60%) + TF-IDF (40%) into one unified plagiarism score. 
 •	Gives a more balanced judgment (structural + textual).
+
 
 **•	CLI Tool**
 
