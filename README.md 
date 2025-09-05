@@ -1,4 +1,0 @@
-# CodeSim - Plagiarism Detector
-
-Run like this:
-python pycode_similar.py examples/ref.py examples/cand.py
