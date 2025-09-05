@@ -7,22 +7,26 @@ It combines Data Structures & Algorithms (DSA) (AST parsing, tree diff, structur
 
 Features
 **•	AST-based structural comparison (DSA)**
-	•	Parses Python code into Abstract Syntax Trees (AST).
-	•	Compares structure of functions/classes using tree edit distance and line diffs.
-	•	Detects disguised plagiarism (e.g., renaming variables, reordering).
+
+•	Parses Python code into Abstract Syntax Trees (AST).
+•	Compares structure of functions/classes using tree edit distance and line diffs.
+•	Detects disguised plagiarism (e.g., renaming variables, reordering).
 
 **•	ML-based text similarity**
-	•	Uses TF-IDF vectorization + cosine similarity.
-	•	Captures token-level similarity between reference and candidate code.
-	•	Robust against comments, spacing, and simple edits.
+
+•	Uses TF-IDF vectorization + cosine similarity.
+•	Captures token-level similarity between reference and candidate code. 
+•	Robust against comments, spacing, and simple edits.
 
 **•	Hybrid scoring**
-	•	Combines AST (60%) + TF-IDF (40%) into one unified plagiarism score.
-	•	Gives a more balanced judgment (structural + textual).
+
+•	Combines AST (60%) + TF-IDF (40%) into one unified plagiarism score. 
+•	Gives a more balanced judgment (structural + textual).
 
 **•	CLI Tool**
-	•	Run directly from the terminal.
-	•	Shows per-file plagiarism percent, TF-IDF score, and hybrid score.
+
+•	Run directly from the terminal.
+•	Shows per-file plagiarism percent, TF-IDF score, and hybrid score.
 
 
 **Project Structure**
@@ -45,13 +49,13 @@ git clone https://github.com/Emma8762/Code-Plagrism-Detector.git
 cd Code-Plagrism-Detector
 ```
 
-	2.	Create a virtual environment (recommended):
+2.	Create a virtual environment (recommended):
 ```text
 python -m venv venv
 source venv/bin/activate       # Mac/Linux
 .\venv\Scripts\activate        # Windows
 ```
-	3.	Install dependencies:
+3.	Install dependencies:
 ```text
 pip install -r requirements.txt
 ```
