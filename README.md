@@ -1,4 +1,4 @@
-<h1 align="center">🔍 Code-Plagiarism-Detector</h1>
+<h1 align="center"> Code-Plagiarism-Detector</h1>
 
 A hybrid plagiarism detection tool for Python code.
 It combines Data Structures & Algorithms (DSA) (AST parsing, tree diff, structural hashing) with Machine Learning (ML) (TF-IDF + cosine similarity) to detect code similarity, even if variables are renamed or formatting is changed.
