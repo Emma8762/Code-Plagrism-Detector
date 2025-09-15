@@ -2,7 +2,6 @@
 __author__ = 'aditeepatil868@gmail.com'
 __version__ = '1.2'
 from ml_scorer import batch_tfidf_scores
-# Added ML scorer: TF-IDF similarity functions are in ml_scorer.py
 import sys
 import ast
 import difflib
@@ -180,7 +179,9 @@ class ModuleNodeCollector(BaseNodeNormalizer):
 
 
 class FuncNodeCollector(BaseNodeNormalizer):
-    
+    """
+    Normalize and collect all function nodes.
+    """
 
     def __init__(self, *args, **kwargs):
         super(FuncNodeCollector, self).__init__(*args, **kwargs)
@@ -212,7 +213,12 @@ class FuncNodeCollector(BaseNodeNormalizer):
 
 
 class FuncInfo(object):
-   
+    """
+    Part of the astor library for Python AST manipulation.
+    License: 3-clause BSD
+    Copyright 2012 (c) Patrick Maupin
+    Copyright 2013 (c) Berker Peksag
+    """
 
     class NonExistent(object):
         pass
@@ -433,7 +439,7 @@ class TreeDiff(object):
             if not hasattr(n, 'children'):
                 n.children = list(ast.iter_child_nodes(n))
             return n.children
-# Optional: zss is used for tree edit distance (slow). Install via `pip install zss`.
+
         import zss
         res = zss.distance(a.func_node, b.func_node, _get_children,
                            lambda node: 0,  # insert cost
@@ -457,8 +463,7 @@ class AstParsingException(Exception):
     def __int__(self, source):
         super(AstParsingException, self).__init__('Can not parse code to AST, index = {}'.format(source))
         self.source = source
-# Change: detect() now computes and returns both AST diff results and TF-IDF scores.
-# Returns: (ast_diff_result, tfidf_results)
+
 
 def detect(pycode_string_list, diff_method=UnifiedDiff, keep_prints=False, module_level=False, continue_on_error=False, include_tfidf=True):
     if len(pycode_string_list) < 2:
@@ -587,7 +592,6 @@ def main():
         if ivalue < 0:
             raise argparse.ArgumentTypeError("%s is an invalid percentage limit" % value)
         return ivalue
-# Fix: open files in text mode with utf-8 (was 'rb' earlier). ast.parse and TF-IDF need strings.
 
     def get_file(value):
         return open(value, 'r', encoding='utf-8')
@@ -609,31 +613,60 @@ def main():
     pycode_list = [(f.name, f.read()) for f in args.files]
     
     
-    results_ast, results_tfidf = detect(
-        [c[1] for c in pycode_list],
-        keep_prints=args.keep_prints,
-        module_level=args.module_level,
-        continue_on_error=args.continue_on_error,
-        include_tfidf=True
-    )
+        # Try the normal AST + TF-IDF detection (works for Python files)
+    try:
+        results_ast, results_tfidf = detect(
+            [c[1] for c in pycode_list],
+            keep_prints=args.keep_prints,
+            module_level=args.module_level,
+            continue_on_error=args.continue_on_error,
+            include_tfidf=True
+        )
 
-    tfidf_map = {idx: score for idx, score in results_tfidf} if results_tfidf else {}
+        # build TF-IDF map if available
+        tfidf_map = {idx: score for idx, score in results_tfidf} if results_tfidf else {}
 
-    for index, func_ast_diff_list in results_ast:
-        print('ref: {}'.format(pycode_list[0][0]))
-        print('candidate: {}'.format(pycode_list[index][0]))
+        # Print AST + TF-IDF hybrid results (existing behavior)
+        for index, func_ast_diff_list in results_ast:
+            print('ref: {}'.format(pycode_list[0][0]))
+            print('candidate: {}'.format(pycode_list[index][0]))
 
-        sum_plagiarism_percent, sum_plagiarism_count, sum_total_count = summarize(func_ast_diff_list)
-        print('{:.2f} % ({}/{}) of ref code structure is plagiarized by candidate.'.format(
-            sum_plagiarism_percent * 100,
-            sum_plagiarism_count,
-            sum_total_count,
-        ))
+            sum_plagiarism_percent, sum_plagiarism_count, sum_total_count = summarize(func_ast_diff_list)
+            print('{:.2f} % ({}/{}) of ref code structure is plagiarized by candidate.'.format(
+                sum_plagiarism_percent * 100,
+                sum_plagiarism_count,
+                sum_total_count,
+            ))
 
-        if index in tfidf_map:
-            print('TF-IDF cosine similarity: {:.4f}'.format(tfidf_map[index]))
-            combined = 0.6 * sum_plagiarism_percent + 0.4 * tfidf_map[index]
-            print('Combined hybrid similarity (AST 60% + TF-IDF 40%): {:.4f}'.format(combined))
+            if index in tfidf_map:
+                print('TF-IDF cosine similarity: {:.4f}'.format(tfidf_map[index]))
+                combined = 0.6 * sum_plagiarism_percent + 0.4 * tfidf_map[index]
+                print('Combined hybrid similarity (AST 60% + TF-IDF 40%): {:.4f}'.format(combined))
+
+    except Exception as e:
+        # AST parsing failed (probably non-Python files). Fall back to TF-IDF-only.
+        # We still compute TF-IDF similarity across the files as plain text so C/C++/Java files work.
+        try:
+            texts = [c[1] for c in pycode_list]
+            tfidf_results = batch_tfidf_scores(texts)
+            tfidf_map = {idx: score for idx, score in tfidf_results} if tfidf_results else {}
+
+            # Print friendly TF-IDF-only output
+            print('ref: {}'.format(pycode_list[0][0]))
+            for idx in range(1, len(pycode_list)):
+                cand_name = pycode_list[idx][0]
+                sim = tfidf_map.get(idx, None)
+                if sim is None:
+                    print('candidate: {} -- TF-IDF similarity: (not computed)'.format(cand_name))
+                else:
+                    print('candidate: {} -- TF-IDF cosine similarity: {:.4f}'.format(cand_name, sim))
+            print('\nNote: AST-based comparison failed (probably non-Python files). Shown above is TF-IDF text similarity only.')
+        except Exception as e2:
+            # If even TF-IDF fails (e.g. sklearn missing), show error
+            print('Error: Both AST comparison and TF-IDF fallback failed.')
+            print('AST error:', str(e))
+            print('TF-IDF error:', str(e2))
+            sys.exit(1)
 
 if __name__ == '__main__':
     main()
