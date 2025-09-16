@@ -13,8 +13,8 @@ from collections import Counter
 # avoid using six to keep dependency clean
 if sys.version_info >= (3, 3):
     import collections.abc as collections
-else:
-    import collections
+
+
 
 if sys.version_info[0] == 3:
     string_types = str
