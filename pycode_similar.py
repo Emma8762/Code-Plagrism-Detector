@@ -542,25 +542,7 @@ def detect(pycode_string_list, diff_method=UnifiedDiff, keep_prints=False, modul
     return ast_diff_result, tfidf_results
 
 
-def _profile(fn):
-    """
-    A simple profile decorator
-    :param fn: target function to be profiled
-    :return: The wrapper function
-    """
-    import functools
-    import cProfile
 
-    @functools.wraps(fn)
-    def _wrapper(*args, **kwargs):
-        pr = cProfile.Profile()
-        pr.enable()
-        res = fn(*args, **kwargs)
-        pr.disable()
-        pr.print_stats('cumulative')
-        return res
-
-    return _wrapper
 
 
 def summarize(func_ast_diff_list):
