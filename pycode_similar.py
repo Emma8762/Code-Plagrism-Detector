@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-__author__ = 'aditeepatil868@gmail.com'
-__version__ = '1.2'
+
 from ml_scorer import batch_tfidf_scores
 import sys
 import ast
