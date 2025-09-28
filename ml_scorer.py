@@ -1,4 +1,4 @@
-# ml_scorer.py
+# ml_scorer
 import re
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
